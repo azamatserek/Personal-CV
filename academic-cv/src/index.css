@@ -1,0 +1,48 @@
+:root {
+  --bg: #f9fafb;
+  --text: #111827;
+  --muted: #4b5563;
+  --accent: #1f2937;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+h1, h2, h3 {
+  font-family: "Merriweather", serif;
+  color: var(--accent);
+}
+
+.section {
+  margin-top: 4rem;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.links a {
+  margin-right: 1rem;
+  text-decoration: none;
+  color: var(--accent);
+  font-weight: 500;
+}
