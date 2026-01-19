@@ -1,19 +1,44 @@
-FROM golang:1.25-alpine
-# Install git (needed if go mod needs to fetch modules)
-RUN apk add --no-cache git
+# ---------- Build Stage ----------
+FROM golang:1.25-alpine AS builder
 
-# Set working directory
+# 1. Install build dependencies (needed for CGO/SQLite)
+RUN apk add --no-cache git gcc musl-dev
+
+# 2. Set working directory
 WORKDIR /app
 
-# Copy Go modules first for caching
-COPY go.mod ./
+# 3. Copy go.mod and go.sum first
+COPY go.mod go.sum ./
 
+# 4. Set Go environment variables
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GOSUMDB=off
+ENV CGO_ENABLED=1
+ENV GOOS=linux
 
-# Copy the rest of the code
+# 5. Download dependencies
+RUN go mod tidy
+RUN go mod download -x
+
+# 6. Copy the rest of the source code
 COPY . .
 
-# Expose API port
+# 7. Build the binary
+RUN go build -o server ./cmd/server/main.go
+
+# ---------- Final Stage ----------
+FROM alpine:latest
+
+# 8. Install runtime dependencies (needed for SQLite)
+RUN apk add --no-cache libgcc libstdc++ ca-certificates
+
+WORKDIR /app
+
+# 9. Copy the compiled binary from builder
+COPY --from=builder /app/server .
+
+# 10. Expose port
 EXPOSE 8081
 
-# Run the Go app
-CMD ["go", "run", "cmd/server/main.go"]
+# 11. Run the server
+CMD ["./server"]

@@ -1,38 +1,39 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
+    "encoding/json"
+    "log"
+    "net/http"
+
+    "academic-cv-backend/db"
+    "academic-cv-backend/internal/experience" // Ensure this path is correct
 )
 
-type Experience struct {
-	Position     string `json:"position"`
-	Organization string `json:"organization"`
-	Start        string `json:"start"`
-	End          string `json:"end"`
-	Description  string `json:"description"`
-}
-
 func main() {
-	experiences := []Experience{
-		{
-			Position:     "Associate Professor",
-			Organization: "Astana IT University",
-			Start:        "Dec 2025",
-			End:          "Present",
-			Description:  "Teaching, research, leading grants funded by Ministry.",
-		},
-	}
+    // 1. Initialize DB (Matches your db.go signature)
+    database := db.InitDB()
+    defer database.Close()
 
-	http.HandleFunc("/api/experience", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		json.NewEncoder(w).Encode(experiences)
-	})
+    // 2. Seed data (Matches your db.go signature)
+    db.SeedExperiences(database)
 
-	log.Println("Server running on :8081")
-	if err := http.ListenAndServe(":8081", nil); err != nil {
-		log.Fatal(err)
-	}
+    // 3. Initialize the Service you built
+    expService := experience.NewService(database)
+
+    http.HandleFunc("/api/experience", func(w http.ResponseWriter, r *http.Request) {
+       w.Header().Set("Content-Type", "application/json")
+       w.Header().Set("Access-Control-Allow-Origin", "*")
+
+       // Use the service instead of manual SQL here
+       experiences := expService.GetAll()
+
+       if err := json.NewEncoder(w).Encode(experiences); err != nil {
+          log.Printf("Failed to encode response: %v", err)
+       }
+    })
+
+    log.Println("Server running on :8081")
+    if err := http.ListenAndServe(":8081", nil); err != nil {
+       log.Fatal(err)
+    }
 }

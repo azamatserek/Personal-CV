@@ -1,22 +1,41 @@
 package experience
 
-// ExperienceService provides business logic
+import (
+    "database/sql"
+    "log"
+)
+
+// ExperienceService now holds a reference to the database connection
 type ExperienceService struct {
-    experiences []Experience
+    db *sql.DB
 }
 
-// NewService initializes the service
-func NewService() *ExperienceService {
+// NewService accepts the db connection from your main/db package
+func NewService(db *sql.DB) *ExperienceService {
     return &ExperienceService{
-        experiences: []Experience{
-            {Position: "Associate Professor", Organization: "Astana IT University", Start: "Dec 2025", End: "Present", Description: "Teaching, research, leading grants funded by Ministry."},
-            {Position: "Assistant Professor", Organization: "Kazakh-British Technical University", Start: "Sep 2024", End: "Dec 2025", Description: "Lecturing, curriculum development, student supervision."},
-            {Position: "Senior Lecturer", Organization: "SDU University", Start: "Sep 2018", End: "Sep 2024", Description: "Teaching software courses, research projects, mentoring students."},
-        },
+        db: db,
     }
 }
 
-// GetAll returns all experiences
+// GetAll fetches all rows from the database
 func (s *ExperienceService) GetAll() []Experience {
-    return s.experiences
+    rows, err := s.db.Query("SELECT position, organization, start, end, description FROM experiences")
+    if err != nil {
+        log.Printf("Error querying experiences: %v", err)
+        return nil
+    }
+    defer rows.Close()
+
+    var experiences []Experience
+    for rows.Next() {
+        var exp Experience
+        err := rows.Scan(&exp.Position, &exp.Organization, &exp.Start, &exp.End, &exp.Description)
+        if err != nil {
+            log.Printf("Error scanning experience: %v", err)
+            continue
+        }
+        experiences = append(experiences, exp)
+    }
+
+    return experiences
 }
