@@ -46,3 +46,49 @@ h1, h2, h3 {
   color: var(--accent);
   font-weight: 500;
 }
+
+.navbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.navbar a {
+  margin-right: 20px;
+  transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+  color: #007bff; /* Or your brand color */
+}
+
+.year-header {
+  border-bottom: 2px solid #007bff;
+  color: #333;
+  margin-top: 30px;
+  padding-bottom: 5px;
+}
+
+.pub-item {
+  margin-bottom: 1.5rem;
+  list-style-type: none;
+}
+
+.pub-title {
+  display: block;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.pub-authors {
+  display: block;
+  color: #555;
+}
+
+.pub-type {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #007bff;
+  margin-right: 10px;
+}
